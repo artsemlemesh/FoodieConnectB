@@ -15,9 +15,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from myproject import settings
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path('users/', include('users.urls', namespace='users')),#'users:login' #namespace is the same as # app_name= 'users', if there are the same names of urls in different apps then it wont be confused
 ]
+
+if settings.DEBUG: # setting the address to display uploaded picture on the page
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

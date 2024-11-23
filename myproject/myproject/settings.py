@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'users', #login/register users
 ]
 
 MIDDLEWARE = [
@@ -54,7 +55,7 @@ ROOT_URLCONF = "myproject.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, 'templates')],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -116,8 +117,46 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATICFILES_DIRS = [
+    BASE_DIR / 'static'
+]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGIN_REDIRECT_URL = 'index'
+LOGOUT_REDIRECT_URL = 'index'
+LOGIN_URL = 'users:login' #if i am not logged in and try to go to the @login_required page, i will be redirected to the users:login page
+
+#the field below is for email registration
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",#this built in backend authenticate by username and password
+    'users.authentication.EmailAuthBackend',# our own created backend that authorises by email
+]
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend" #this line is for sending emails (signals, password resets, etc...)
+
+#NEED TO SET UP LATER
+#the lines below is for password reset by email, it finally works perfectly and sends email on my mail
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'artem.lems@yandex.ru'
+EMAIL_HOST_PASSWORD = 'fsjmlstvaabhrbhp'
+EMAIL_USE_SSL = True
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER #this line is important for sending messages such as password reset(doesnt work without it)
+SERVER_EMAIL = EMAIL_HOST_USER
+EMAIL_ADMIN = EMAIL_HOST_USER
+
+AUTH_USER_MODEL = "users.User" #bcz we customized the base User model
+
+
+MEDIA_ROOT = BASE_DIR / 'media' #creates one directory for all the media files , instead of two directories 'uploads'-forms upload and 'upload_models'-model upload, we have 'media' for any files and ways of upload
+MEDIA_URL = '/media/'#to display pictures
+
+
+
+DEFAULT_USER_IMAGE = MEDIA_URL + 'users/default.png' # we defined default url link for our photo profile ( also changes in profile.html and ProfileUser)

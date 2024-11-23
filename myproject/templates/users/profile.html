@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Profile</h1>
+
+<form method="post" enctype="multipart/form-data"> <!-- after we added field photo to ProfileUserForm we have to add here 'enctype' to display photos -->
+
+    {% csrf_token %}
+    
+<!--this block is to display photo of a user-->
+    {% if user.photo %}
+    <p><img src="{{ user.photo.url }}"></p>
+    {% else %}
+    <p><img src="{{ default_image }}"></p><!-- in extra_context in class ProfileUser -->
+    {% endif %}
+    
+    
+<div class="form-error">{{ form.non_field_errors }}</div>
+    {% for f in form %} <!-- form.title is replaced by f, form.slug the same/ iterates through each field taken from model Men: title, slug, content etc. -->
+        <p><label class="form-label" for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}</p> <!-- here is class="form-label", however if we need to write our custom classes then we go to the forms and create attribute widget -->
+        <div class="form-error">{{ f.errors }}</div>
+    {% endfor %}
+
+        <p><button type="submit">Save</button></p>
+</form>
+
+<hr>
+<p><a href="{% url 'users:password_change' %}">Change the password</a> </p>
+{% endblock %}

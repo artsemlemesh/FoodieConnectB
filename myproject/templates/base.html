@@ -1,0 +1,33 @@
+<!-- myproject/templates/base.html -->
+{% load static %}
+<html>
+<head>
+    <title>{{ title }}</title>
+    <link type="text/css" href="{% static 'men/css/styles.css' %}" rel="stylesheet" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div class="header">
+        <ul id="mainmenu">
+            {% for m in mainmenu %}
+                <li><a href="{% url m.url_name %}">{{ m.title }}</a></li>
+            {% endfor %}
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'users:profile' %}">{{ user.username }}</a> | <a href="{% url 'users:logout' %}">Logout</a></li>
+            {% else %}
+                <li><a href="{% url 'users:login' %}">Login</a> | <a href="{% url 'users:register' %}">Register</a></li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <div class="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Your Company. All rights reserved.</p>
+    </footer>
+</body>
+</html>
