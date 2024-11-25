@@ -25,7 +25,6 @@ SECRET_KEY = "django-insecure-g!tdd2wh+0%$6e@!fhxb2^@nzlht-uyn4fazkji-ggm4oy3n%a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -38,17 +37,30 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'users', #login/register users
+    "rest_framework",
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware', #add with cors
+
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+# CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to access the CSRF cookie
+# CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
+# CSRF_TRUSTED_ORIGINS = ['http://localhost:3001']  # Add your frontend URL if needed
+
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
 
 ROOT_URLCONF = "myproject.urls"
 

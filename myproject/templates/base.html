@@ -29,5 +29,12 @@
     <footer>
         <p>&copy; 2023 Your Company. All rights reserved.</p>
     </footer>
+
+    <!-- CSRF Token -->
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 </body>
+<script>
+    // Get the CSRF token from the hidden input field
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+</script>
 </html>
