@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'users', #login/register users
+    'cart', # cart, checkout flows
     "rest_framework",
     'corsheaders',
 ]
