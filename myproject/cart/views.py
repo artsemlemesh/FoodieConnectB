@@ -5,12 +5,19 @@ from rest_framework import status
 from rest_framework.views import APIView
 from .models import CartItem, Product, Order, OrderItem
 from .serializers import CartItemSerializer
+from rest_framework.permissions import IsAuthenticated
+
 
 class CartView(APIView):
+    # permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        cart_items = CartItem.objects.filter(user=request.user)
-        serializer = CartItemSerializer(cart_items, many=True)
-        return Response(serializer.data)
+        if request.user.is_authenticated:
+            cart_items = CartItem.objects.filter(user=request.user)
+            serializer = CartItemSerializer(cart_items, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'User not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
     
 
     def post(self, request):

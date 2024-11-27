@@ -22,12 +22,12 @@ class LoginUser(APIView):  # Change to APIView for API handling
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
+            login(request, user)
             # You can return user data or a token here
             photo_url = None
             if user.photo:
                 photo_url = f"{request.build_absolute_uri(settings.MEDIA_URL)}{user.photo.name}"
 
-            
             return Response({
                 "message": "Login successful",
                 "username": user.username,
