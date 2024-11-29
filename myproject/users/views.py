@@ -1,59 +1,94 @@
-from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
-from django.contrib.auth import authenticate, login, logout, get_user_model
-from django.http import HttpResponse, HttpResponseRedirect
-from django.views.generic import CreateView, UpdateView
+from django.contrib.auth import  login, logout, get_user_model
+from django.http import  HttpResponseRedirect
 from myproject import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-
-from django.contrib.auth.views import LoginView, PasswordChangeView
-from users.forms import LoginUserForm, RegisterUserForm, ProfileUserForm, UserPasswordChangeForm
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
+from rest_framework.permissions import IsAuthenticated
 from .serializers import LoginSerializer, RegisterSerializer, ProfileSerializer, PasswordChangeSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.decorators import api_view
+from rest_framework_simplejwt.tokens import RefreshToken  
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import CustomTokenObtainPairSerializer
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework.permissions import AllowAny
 
-class LoginUser(APIView):  # Change to APIView for API handling
-    def post(self, request):
-        serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.validated_data['user']
-            login(request, user)
-            # You can return user data or a token here
-            photo_url = None
-            if user.photo:
-                photo_url = f"{request.build_absolute_uri(settings.MEDIA_URL)}{user.photo.name}"
 
-            return Response({
-                "message": "Login successful",
-                "username": user.username,
-                "photo": photo_url  # Return the photo URL or None if not set
-            }, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# login view 
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+
+
+
+# class LoginUser(APIView):  # Change to APIView for API handling
+#     def post(self, request):
+#         serializer = LoginSerializer(data=request.data)
+#         if serializer.is_valid():
+#             user = serializer.validated_data['user']
+#             login(request, user)
+#             # You can return user data or a token here
+#             photo_url = None
+#             if user.photo:
+#                 photo_url = f"{request.build_absolute_uri(settings.MEDIA_URL)}{user.photo.name}"
+
+#             return Response({
+#                 "message": "Login successful",
+#                 "username": user.username,
+#                 "photo": photo_url  # Return the photo URL or None if not set
+#             }, status=status.HTTP_200_OK)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    def get(self, request):
-        # You can return a simple message or a form if needed
-        return Response({"message": "Please provide your username and password to log in."}, status=status.HTTP_200_OK)
+#     def get(self, request):
+#         # You can return a simple message or a form if needed
+#         return Response({"message": "Please provide your username and password to log in."}, status=status.HTTP_200_OK)
 
 
-@api_view(['POST'])
-def logout_user(request):
-    logout(request)
-    return HttpResponseRedirect(reverse('users:login'))
+# @api_view(['POST'])
+# def logout_user(request):
+#     logout(request)
+#     return HttpResponseRedirect(reverse('users:login'))
 
 
-class RegisterUser(generics.CreateAPIView):
-    # form_class = RegisterUserForm   #those are for html templates
-    # template_name = 'users/register.html'
-    serializer_class = RegisterSerializer
-    # extra_context = {'title': 'registration'} # no need
-    success_url = reverse_lazy('users:login') # check later
+
+class LogoutView(APIView):
+    permission_classes = [AllowAny]  # No authentication required
+
+    def post(self, request):
+        refresh_token = request.data.get('refresh_token')
+        if not refresh_token:
+            return Response({"detail": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({"detail": "Successfully logged out"}, status=status.HTTP_205_RESET_CONTENT)
+        except TokenError:
+            return Response({"detail": "Invalid or already blacklisted token"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class RegisterUser(APIView):
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()  
+        
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+
+        return Response({
+            "access": str(access),
+            "refresh": str(refresh),
+            "user": {
+                "username": user.username,
+                "photo": user.photo.url if user.photo else None,  
+            }
+        }, status=status.HTTP_201_CREATED)
 class ProfileUser(LoginRequiredMixin, generics.UpdateAPIView):
     # model = get_user_model()
     # form_class = ProfileUserForm

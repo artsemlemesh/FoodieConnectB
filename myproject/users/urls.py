@@ -1,20 +1,19 @@
 
 
 from django.urls import path, reverse_lazy
-from .views import RegisterUser, LoginUser, ProfileUser, logout_user, UserPasswordChange
+from .views import RegisterUser, LogoutView, ProfileUser, UserPasswordChange, CustomTokenObtainPairView
 
-from django.contrib.auth.views import LogoutView, PasswordChangeView, PasswordChangeDoneView, PasswordResetDoneView, \
+from django.contrib.auth.views import PasswordChangeDoneView, PasswordResetDoneView, \
     PasswordResetView, PasswordResetConfirmView, PasswordResetCompleteView
 
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView 
+from rest_framework_simplejwt.views import  TokenRefreshView 
 
 app_name = 'users'
 
 urlpatterns = [
-    path('login/', LoginUser.as_view(), name='login'),
-    path('logout/', logout_user, name='logout'),
+    path('logout/', LogoutView.as_view(), name='logout'),
 
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('password-change/', UserPasswordChange.as_view(), name='password_change'),
     path('password-change/done/', PasswordChangeDoneView.as_view(template_name='users/password_change_done.html'), name='password_change_done'),

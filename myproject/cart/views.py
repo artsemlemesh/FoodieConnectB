@@ -6,10 +6,11 @@ from rest_framework.views import APIView
 from .models import CartItem, Product, Order, OrderItem
 from .serializers import CartItemSerializer
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound
 
 
 class CartView(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         if request.user.is_authenticated:
@@ -24,7 +25,11 @@ class CartView(APIView):
         product_id = request.data.get('product_id')
         quantity = request.data.get('quantity', 1)
 
-        product = Product.objects.get(id=product_id)
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+        
         cart_item, created = CartItem.objects.get_or_create(
             user=request.user, product=product,
             defaults={'quantity': quantity}
@@ -43,7 +48,21 @@ class CartView(APIView):
             return Response({'message': 'Item removed from cart'}, status=status.HTTP_200_OK)
         return Response({'error': 'Item not found in cart'}, status=status.HTTP_404_NOT_FOUND)
     
+    def patch(self, request):
+        product_id = request.data.get('product_id')
+        quantity = request.data.get('quantity')
 
+        if not quantity or int(quantity) < 1:
+            return Response({'error': 'Quantity must be at least 1'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            cart_item = CartItem.objects.get(user=request.user, product_id=product_id)
+        except CartItem.DoesNotExist:
+            raise NotFound({'error': 'Cart item not found'})
+        cart_item.quantity = quantity
+        cart_item.save()
+        serializer = CartItemSerializer(cart_item)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
 
 class CheckoutView(APIView):
     def post(self, request):
