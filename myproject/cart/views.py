@@ -83,4 +83,4 @@ class CheckoutView(APIView):
 
         cart_items.delete() #clear the cart after order is created
 
-        return Response({'message': 'Order Created successfully'}, status=status.HTTP_201_CREATED)
+        return Response({'message': 'Order Created successfully', 'order_id': order.id}, status=status.HTTP_201_CREATED)
