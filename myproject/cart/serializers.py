@@ -5,7 +5,8 @@ from .models import CartItem, Product
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['id', 'name', 'price', 'description', 'photo']
+        fields = ['id', 'name', 'price', 'description', 'photo', 'category']
+
 
 class CartItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
@@ -21,3 +22,5 @@ class CartItemSerializer(serializers.ModelSerializer):
     
     def get_total_price(self, obj):
         return obj.quantity * obj.product.price
+    
+

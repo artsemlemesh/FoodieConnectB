@@ -4,9 +4,12 @@ from rest_framework import status
 
 from rest_framework.views import APIView
 from .models import CartItem, Product, Order, OrderItem
-from .serializers import CartItemSerializer
+from .serializers import CartItemSerializer, ProductSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
+from rest_framework import generics
+
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 
 class CartView(APIView):
@@ -15,7 +18,7 @@ class CartView(APIView):
     def get(self, request):
         if request.user.is_authenticated:
             cart_items = CartItem.objects.filter(user=request.user)
-            serializer = CartItemSerializer(cart_items, many=True)
+            serializer = CartItemSerializer(cart_items, many=True, context={'request': request}) # explicitly pass context for displaying photos, in generics its send automatically
             return Response(serializer.data)
         else:
             return Response({'error': 'User not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -84,3 +87,14 @@ class CheckoutView(APIView):
         cart_items.delete() #clear the cart after order is created
 
         return Response({'message': 'Order Created successfully', 'order_id': order.id}, status=status.HTTP_201_CREATED)
+    
+
+class ProductListCreateView(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+class ProductRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
