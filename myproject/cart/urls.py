@@ -1,11 +1,11 @@
 from django.urls import path
-from .views import CheckoutView, CartView, ProductListCreateView, ProductRetrieveUpdateDestroyView
+from .views import CreatePaymentIntentView, CartView, ProductListCreateView, ProductRetrieveUpdateDestroyView
 
 
 app_name = 'cart'
 
 urlpatterns = [
-    path('checkout/', CheckoutView.as_view(), name='checkout'),
+    path('create-payment-intent/', CreatePaymentIntentView.as_view(), name='create-payment-intent'),
     path('cart/', CartView.as_view(), name='cart'),
 
     path('products/', ProductListCreateView.as_view(), name='product-list-create'),

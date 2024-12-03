@@ -8,7 +8,8 @@ from .serializers import CartItemSerializer, ProductSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
 from rest_framework import generics
-
+import stripe
+from django.conf import settings
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 
@@ -67,27 +68,35 @@ class CartView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
-class CheckoutView(APIView):
-    def post(self, request):
-        cart_items = CartItem.objects.filter(user=request.user)
-        if not cart_items.exists():
-            return Response({'error': 'Cart is empty'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        total_amount = sum(item.total_price() for item in cart_items)
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
-        order = Order.objects.create(user=request.user, total_amount=total_amount)
-        for item in cart_items:
-            OrderItem.objects.create(
-                order=order,
-                product=item.product,
-                quantity=item.quantity,
-                price=item.total_price()
+class CreatePaymentIntentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            # Amount is sent in cents
+            amount = request.data.get('amount', 0)
+            if amount <= 0:
+                return Response({'error': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Create a Payment Intent
+            payment_intent = stripe.PaymentIntent.create(
+                amount=amount,  # Amount in cents
+                currency='usd',
+                payment_method_types=['card'],
             )
 
-        cart_items.delete() #clear the cart after order is created
+            return Response({'clientSecret': payment_intent['client_secret']}, status=status.HTTP_200_OK)
 
-        return Response({'message': 'Order Created successfully', 'order_id': order.id}, status=status.HTTP_201_CREATED)
-    
+        except stripe.error.StripeError as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
 
 class ProductListCreateView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
