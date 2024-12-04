@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import CreatePaymentIntentView, CartView, ProductListCreateView, ProductRetrieveUpdateDestroyView
+from .views import CreatePaymentIntentView, CartView, ProductListCreateView, ProductRetrieveUpdateDestroyView, UpdateOrderStatusView
 
+from webhooks.stripe_webhook import stripe_webhook
 
 app_name = 'cart'
 
@@ -10,5 +11,10 @@ urlpatterns = [
 
     path('products/', ProductListCreateView.as_view(), name='product-list-create'),
     path('products/<int:pk>/', ProductRetrieveUpdateDestroyView.as_view(), name='product-retrieve-update-destroy'),
+
+    path('stripe/webhook/', stripe_webhook, name='stripe-webhook'),
+
+    path('orders/<int:order_id>/update-status', UpdateOrderStatusView.as_view(), name='update-order-status'),
+
 
 ]

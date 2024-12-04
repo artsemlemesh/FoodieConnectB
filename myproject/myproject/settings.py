@@ -85,8 +85,8 @@ REST_FRAMEWORK = {
 
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', '')
-print('Stripe Secret Key from env:', STRIPE_SECRET_KEY)
-
+STRIPE_WEBHOOK_SECRET= os.getenv('STRIPE_WEBHOOK_SECRET', '')
+print('Stripe ', STRIPE_WEBHOOK_SECRET)
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
