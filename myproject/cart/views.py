@@ -11,7 +11,8 @@ from rest_framework import generics
 import stripe
 from django.conf import settings
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 class CartView(APIView):
     permission_classes = [IsAuthenticated]
@@ -119,6 +120,17 @@ class UpdateOrderStatusView(APIView):
             
             order.status = new_status
             order.save()
+
+
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f'order_{order_id}',
+                {
+                    'type': 'order_status_update',
+                    'message': new_status
+                }
+            )
+
             return Response({'message': 'Order status updated successfully'}, status=status.HTTP_200_OK)
         except Order.DoesNotExist:
             return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
