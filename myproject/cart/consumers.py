@@ -16,14 +16,12 @@ class OrderConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
-        # Leave the order group
         await self.channel_layer.group_discard(
             self.order_group_name,
             self.channel_name
         )
 
     async def receive(self, text_data):
-        # Handle incoming WebSocket data
         data = json.loads(text_data)
         await self.channel_layer.group_send(
             self.order_group_name,
@@ -38,4 +36,3 @@ class OrderConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'message': event['message']
         }))
-        # daphne -b 0.0.0.0 -p 8000 myproject.asgi:application

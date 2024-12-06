@@ -1,9 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-
-
-
-
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 class Product(models.Model):
     name = models.CharField(max_length=100)
@@ -11,8 +9,7 @@ class Product(models.Model):
     description = models.TextField()
     photo = models.ImageField(upload_to='products/')
     category = models.CharField(max_length=50, default='General')  # Added category field
-
-
+    
     def __str__(self):
         return self.name
     
@@ -29,10 +26,6 @@ class CartItem(models.Model):
         return f"{self.product.name} - {self.quantity}"
     
 
-
-
-
-
 class Order(models.Model):
     STATUS_CHOICES = [
         ('Pending', 'Pending'),
@@ -40,7 +33,6 @@ class Order(models.Model):
         ('En Route', 'En Route'),
         ('Delivered', 'Delivered'),
     ]
-
 
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -53,8 +45,23 @@ class Order(models.Model):
 
     def __str__(self):
         return f'Order {self.id} - {self.status}'
+    
+    def save(self, *args, **kwargs):
+        # Check if the status has changed
+        if self.pk:  # Ensure this is an update, not a new object
+            old_status = Order.objects.get(pk=self.pk).status
+            if old_status != self.status:
+                # Send WebSocket message to the group
+                channel_layer = get_channel_layer()
+                async_to_sync(channel_layer.group_send)(
+                    f'order_{self.id}',  # Group name
+                    {'type': 'order_status_update', 'message': self.status}
+                )
+        super().save(*args, **kwargs)
+
 
 class OrderItem(models.Model):
+
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
@@ -62,3 +69,10 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.product.name} ({self.quantity})"
+    
+
+# from cart.models import Order
+
+# order = Order.objects.get(id=1)  
+# order.status = 'En Route'  
+# order.save()  
