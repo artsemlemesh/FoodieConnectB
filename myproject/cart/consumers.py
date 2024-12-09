@@ -34,5 +34,7 @@ class OrderConsumer(AsyncWebsocketConsumer):
     async def order_status_update(self, event):
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
-            'message': event['message']
+            'message': event['message'],
+            'eta': event.get('eta', None)
+
         }))

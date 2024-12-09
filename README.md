@@ -31,3 +31,7 @@ CHANNEL_LAYERS = {
    redis-cli ping
 
 #after redis is running on the background it wont be in console
+
+
+after fixing websokets install celery for ETA updates
+#    pip install 'celery[redis]'

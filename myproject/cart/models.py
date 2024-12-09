@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from datetime import timedelta
 
 class Product(models.Model):
     name = models.CharField(max_length=100)
@@ -42,15 +43,21 @@ class Order(models.Model):
         choices=STATUS_CHOICES,
         default='Pending'
     )
+    eta = models.DateTimeField(null=True, blank=True)  # Estimated time of arrival
+
 
     def __str__(self):
         return f'Order {self.id} - {self.status}'
     
+    def update_eta(self, minutes=15):
+        self.eta = self.created_at + timedelta(minutes=minutes)
+        self.save()
+
     def save(self, *args, **kwargs):
         # Check if the status has changed
         if self.pk:  # Ensure this is an update, not a new object
-            old_status = Order.objects.get(pk=self.pk).status
-            if old_status != self.status:
+            old_status = Order.objects.filter(pk=self.pk).values_list('status', flat=True).first()
+            if old_status and old_status != self.status:
                 # Send WebSocket message to the group
                 channel_layer = get_channel_layer()
                 async_to_sync(channel_layer.group_send)(

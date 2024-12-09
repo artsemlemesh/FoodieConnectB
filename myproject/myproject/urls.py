@@ -28,4 +28,5 @@ urlpatterns = [
 
 if settings.DEBUG: # setting the address to display uploaded picture on the page
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)  # Serve static files
 

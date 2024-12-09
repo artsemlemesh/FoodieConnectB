@@ -13,6 +13,8 @@ from django.conf import settings
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from .tasks import update_order_status
+
 
 class CartView(APIView):
     permission_classes = [IsAuthenticated]
@@ -78,17 +80,32 @@ class CreatePaymentIntentView(APIView):
         try:
             # Amount is sent in cents
             amount = request.data.get('amount', 0)
+
             if amount <= 0:
                 return Response({'error': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
+
+            order = Order.objects.create(
+                user=request.user,
+                total_amount=amount / 100,
+                status='Pending'
+            )
+
+
 
             # Create a Payment Intent
             payment_intent = stripe.PaymentIntent.create(
                 amount=amount,  # Amount in cents
                 currency='usd',
                 payment_method_types=['card'],
+                metadata={'order_id': order.id}  # Include order ID in metadata
+
             )
 
-            return Response({'clientSecret': payment_intent['client_secret']}, status=status.HTTP_200_OK)
+
+            return Response({
+                'clientSecret': payment_intent['client_secret'],
+                'order_id': order.id
+            }, status=status.HTTP_200_OK)
 
         except stripe.error.StripeError as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -96,6 +113,32 @@ class CreatePaymentIntentView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class ConfirmPaymentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        print('ConfirmPaymentView')
+        order_id = request.data.get('order_id')
+
+        try:
+            # Retrieve the order using the order_id
+            order = Order.objects.get(id=order_id, user=request.user)
+
+            # Update the order status to 'Paid'
+            order.status = 'Paid'
+            order.save()
+
+            # update_order_status.delay(order.id)  # Call the Celery task asynchronously
+
+
+            # Return a response with the success page URL
+            return Response({'order_id': order.id}, status=status.HTTP_200_OK)
+
+        except Order.DoesNotExist:
+            return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+
+        
 class ProductListCreateView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
