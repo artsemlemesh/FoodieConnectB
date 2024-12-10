@@ -35,3 +35,9 @@ CHANNEL_LAYERS = {
 
 after fixing websokets install celery for ETA updates
 #    pip install 'celery[redis]'
+
+
+run worker in separate consoles
+# redis-server
+# celery -A myproject worker --loglevel=info
+# daphne -b 0.0.0.0 -p 8000 myproject.asgi:application
