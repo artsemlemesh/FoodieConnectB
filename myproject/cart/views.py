@@ -80,16 +80,22 @@ class CreatePaymentIntentView(APIView):
         try:
             # Amount is sent in cents
             amount = request.data.get('amount', 0)
+            order_id = request.data.get('order_id')
+
 
             if amount <= 0:
                 return Response({'error': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
 
-            order = Order.objects.create(
-                user=request.user,
-                total_amount=amount / 100,
-                status='Pending'
-            )
-
+            # Validate or retrieve existing order, prevents order duplicates
+            if order_id:
+                order = Order.objects.get(id=order_id, user=request.user)
+            else:
+                # Create a new order if no order_id is provided
+                order = Order.objects.create(
+                    user=request.user,
+                    total_amount=amount / 100,
+                    status='Pending'
+                )
 
 
             # Create a Payment Intent
@@ -98,7 +104,6 @@ class CreatePaymentIntentView(APIView):
                 currency='usd',
                 payment_method_types=['card'],
                 metadata={'order_id': order.id}  # Include order ID in metadata
-
             )
 
 
@@ -128,7 +133,7 @@ class ConfirmPaymentView(APIView):
             order.status = 'Paid'
             order.save()
 
-            # update_order_status.delay(order.id)  # Call the Celery task asynchronously
+            update_order_status.delay(order.id)  # Call the Celery task asynchronously
 
 
             # Return a response with the success page URL
