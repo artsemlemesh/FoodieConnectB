@@ -4,7 +4,7 @@ from rest_framework import status
 
 from rest_framework.views import APIView
 from .models import CartItem, Product, Order, OrderItem
-from .serializers import CartItemSerializer, ProductSerializer
+from .serializers import CartItemSerializer, ProductSerializer, OrderSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
 from rest_framework import generics
@@ -70,7 +70,6 @@ class CartView(APIView):
         serializer = CartItemSerializer(cart_item)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class CreatePaymentIntentView(APIView):
@@ -117,7 +116,6 @@ class CreatePaymentIntentView(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
 class ConfirmPaymentView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -140,9 +138,7 @@ class ConfirmPaymentView(APIView):
             return Response({'order_id': order.id}, status=status.HTTP_200_OK)
 
         except Order.DoesNotExist:
-            return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-
+            return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)   
         
 class ProductListCreateView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
@@ -153,7 +149,6 @@ class ProductRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-
 
 class UpdateOrderStatusView(APIView):
     permission_classes = [IsAuthenticated]
@@ -183,7 +178,14 @@ class UpdateOrderStatusView(APIView):
         except Order.DoesNotExist:
             return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
 
+class OrderHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        user = request.user
+        orders = Order.objects.filter(user=user).order_by('-created_at')
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data, status=200)
 
 
 
