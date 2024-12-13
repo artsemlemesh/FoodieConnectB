@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'users', #login/register users
     'cart', # cart, checkout flows
+    'reviews', #reviews app
     "rest_framework",
     'corsheaders',
     'rest_framework_simplejwt',

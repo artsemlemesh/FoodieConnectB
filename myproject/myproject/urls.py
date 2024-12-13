@@ -24,6 +24,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('users/', include('users.urls', namespace='users')),#'users:login' #namespace is the same as # app_name= 'users', if there are the same names of urls in different apps then it wont be confused
     path('cart/', include('cart.urls', namespace='cart')),
+    path('reviews/', include('reviews.urls', namespace='reviews')),
 ]
 
 if settings.DEBUG: # setting the address to display uploaded picture on the page
