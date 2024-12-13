@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from datetime import timedelta
+from reviews.models import Restaurant
 
 class Product(models.Model):
     name = models.CharField(max_length=100)
@@ -45,6 +46,7 @@ class Order(models.Model):
         default=Status.PENDING
     )
     eta = models.DateTimeField(null=True, blank=True)  # Estimated time of arrival
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, null=True, blank=True, related_name='orders')
 
     def progress_status(self):
         """
