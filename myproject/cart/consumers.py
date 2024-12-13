@@ -1,5 +1,6 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
+from channels.db import database_sync_to_async
 
 class OrderConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -15,26 +16,39 @@ class OrderConsumer(AsyncWebsocketConsumer):
         # Accept the connection
         await self.accept()
 
+        # Send initial order state
+        await self.send_order_update()
+
+    async def send_order_update(self):
+        """
+        Fetch and send current order state
+        """
+        from .models import Order # Import here to avoid circular import
+        order = await database_sync_to_async(Order.objects.get)(id=self.order_id)
+        await self.send(text_data=json.dumps({
+            "status": order.status,
+            "eta": order.eta.isoformat() if order.eta else None,
+            "position": {"lat": 40.712776, "lng": -74.005974},  # Default position
+
+        }))
+
+    async def order_status_update(self, event):
+        """
+        Handle incoming status updates
+        """
+        status = event.get("status")
+        eta = event.get("eta")
+        position = event.get("position")
+        if status:
+            await self.send(text_data=json.dumps({
+            "status": status,
+            "eta": eta,
+            "position": position,
+
+        }))
+
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
             self.order_group_name,
             self.channel_name
         )
-
-    async def receive(self, text_data):
-        data = json.loads(text_data)
-        await self.channel_layer.group_send(
-            self.order_group_name,
-            {
-                'type': 'order_status_update',
-                'message': data.get('message', ''),
-            }
-        )
-
-    async def order_status_update(self, event):
-        # Send message to WebSocket
-        await self.send(text_data=json.dumps({
-            'message': event['message'],
-            'eta': event.get('eta', None)
-
-        }))

@@ -28,23 +28,51 @@ class CartItem(models.Model):
     
 
 class Order(models.Model):
-    STATUS_CHOICES = [
-        ('Pending', 'Pending'),
-        ('Preparing', 'Preparing'),
-        ('En Route', 'En Route'),
-        ('Delivered', 'Delivered'),
-    ]
+    class Status(models.TextChoices):
+        PAID = 'Paid', 'Paid'
+        PENDING = 'Pending', 'Pending'
+        PREPARING = 'Preparing', 'Preparing'
+        EN_ROUTE = 'En Route', 'En Route'
+        DELIVERED = 'Delivered', 'Delivered'
+
 
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status = models.CharField(
         max_length=20,
-        choices=STATUS_CHOICES,
-        default='Pending'
+        choices=Status.choices, 
+        default=Status.PENDING
     )
     eta = models.DateTimeField(null=True, blank=True)  # Estimated time of arrival
 
+    def progress_status(self):
+        """
+        Controlled status progression
+        """
+        status_progression = [
+            self.Status.PAID,
+            self.Status.PENDING,
+            self.Status.PREPARING,
+            self.Status.EN_ROUTE,
+            self.Status.DELIVERED
+        ]
+        
+        if self.status == self.Status.DELIVERED:
+            return self.status  # No progression beyond 'Delivered'
+
+        current_index = status_progression.index(self.status)
+        if current_index < len(status_progression) - 1:
+            next_status = status_progression[current_index + 1]
+            self.status = next_status
+            if next_status == self.Status.EN_ROUTE:
+                self.update_eta(15)  # Set ETA when 'En Route'
+            else:
+                self.eta = None  # Clear ETA for other statuses
+            self.save()
+            return self.status
+        return self.status
+    
 
     def __str__(self):
         return f'Order {self.id} - {self.status}'
@@ -78,8 +106,3 @@ class OrderItem(models.Model):
         return f"{self.product.name} ({self.quantity})"
     
 
-# from cart.models import Order
-
-# order = Order.objects.get(id=1)  
-# order.status = 'En Route'  
-# order.save()  
