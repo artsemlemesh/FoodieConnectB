@@ -56,3 +56,15 @@ def update_order_status(order_id):
         logger.error(f"Order {order_id} not found.")
     except Exception as e:
         logger.error(f"Error in updating order status: {e}")
+
+
+# channel_layer = get_channel_layer()
+# async_to_sync(channel_layer.group_send)(
+#     "order_2",  # Replace with your group name
+#     {
+#         "type": "order_status_update",
+#         "status": "Delivered",
+#         "eta": "15 minutes",
+#         "position": {"lat": 40.73061, "lng": -73.935242},
+#     },
+# )
