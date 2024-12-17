@@ -11,7 +11,7 @@ COPY requirements.txt .
 
 
 # Install system dependencies and Python packages
-RUN apt-get update && apt-get install -y \
+RUN apt-get update --fix-missing && apt-get install -y \
     build-essential \
     libpq-dev \
     gcc \

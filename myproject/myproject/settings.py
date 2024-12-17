@@ -172,16 +172,36 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0
 
 
 # This ensures the backend connects to PostgreSQL when running in Docker but falls back to SQLite if environment variables are not set.
+# DATABASES = {
+#     'default': {
+#         'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.sqlite3'),
+#         'NAME': os.getenv('DB_NAME', BASE_DIR / 'db.sqlite3'),
+#         'USER': os.getenv('DB_USER', ''),
+#         'PASSWORD': os.getenv('DB_PASSWORD', ''),
+#         'HOST': os.getenv('DB_HOST', 'localhost'),
+#         'PORT': os.getenv('DB_PORT', ''),
+#     }
+# }
+
+from decouple import config #initially looks in .env file
+
+
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.sqlite3'),
-        'NAME': os.getenv('DB_NAME', BASE_DIR / 'db.sqlite3'),
-        'USER': os.getenv('DB_USER', ''),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', ''),
+        'ENGINE': config('DB_ENGINE'),
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER', default=''),
+        'PASSWORD': config('DB_PASSWORD', default=''),
+        'HOST': config('DB_HOST', default=''),
+        'PORT': config('DB_PORT', default=''),
     }
 }
+print("DB_ENGINE:", config('DB_ENGINE'))
+print("DB_NAME:", config('DB_NAME'))
+print("DB_USER:", config('DB_USER'))
+print("DB_PASSWORD:", config('DB_PASSWORD'))
+print("DB_HOST:", config('DB_HOST'))
+print("DB_PORT:", config('DB_PORT'))
 
 
 # Password validation
