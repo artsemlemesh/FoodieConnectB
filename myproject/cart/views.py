@@ -4,7 +4,7 @@ from rest_framework import status
 
 from rest_framework.views import APIView
 from .models import CartItem, Product, Order, OrderItem
-from .serializers import CartItemSerializer, ProductSerializer, OrderSerializer
+from .serializers import CartItemSerializer, ProductSerializer, OrderSerializer, OrderDeleteViewSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
 from rest_framework import generics
@@ -14,6 +14,11 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .tasks import update_order_status
+from django.views.generic import DeleteView
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.contrib import messages
+from django.shortcuts import get_object_or_404
 
 
 class CartView(APIView):
@@ -177,6 +182,25 @@ class UpdateOrderStatusView(APIView):
             return Response({'message': 'Order status updated successfully'}, status=status.HTTP_200_OK)
         except Order.DoesNotExist:
             return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class OrderDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, order_id):
+        try:
+            order = Order.objects.get(id=order_id, user=request.user)
+            print(order.user)
+            order_data = OrderDeleteViewSerializer(order).data
+            print(order_data)
+            order.delete()
+
+            return Response(
+                {"detail": "Order deleted successfully.", "order": order_data},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except Order.DoesNotExist:
+            return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
 
 class OrderHistoryView(APIView):
     permission_classes = [IsAuthenticated]
