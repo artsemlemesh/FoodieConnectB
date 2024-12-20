@@ -4,7 +4,7 @@ from django.http import  HttpResponseRedirect
 from myproject import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from rest_framework.permissions import IsAuthenticated
-from .serializers import LoginSerializer, RegisterSerializer, ProfileSerializer, PasswordChangeSerializer
+from .serializers import LoginSerializer, RegisterSerializer, ProfileSerializer, PasswordChangeSerializer, UserSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -89,16 +89,9 @@ class RegisterUser(APIView):
                 "photo": user.photo.url if user.photo else None,  
             }
         }, status=status.HTTP_201_CREATED)
-class ProfileUser(LoginRequiredMixin, generics.UpdateAPIView):
-    # model = get_user_model()
-    # form_class = ProfileUserForm
-    # template_name = 'users/profile.html'
-    # extra_context = {'title': 'profile of the user',
-    #                  'default_image': settings.DEFAULT_USER_IMAGE}
     
-
-    # def get_success_url(self):
-    #     return reverse_lazy('users:profile')
+class ProfileUser(LoginRequiredMixin, generics.UpdateAPIView):
+    
     serializer_class = ProfileSerializer
     queryset = get_user_model().objects.all() #probably returns all the users, 
 
@@ -106,6 +99,11 @@ class ProfileUser(LoginRequiredMixin, generics.UpdateAPIView):
     def get_object(self, queryset=None):
         return self.request.user # updates the logged in user profile
     
+
+class UserListView(generics.ListAPIView):
+    queryset = get_user_model().objects.all()
+    serializer_class = UserSerializer
+
 
 class UserPasswordChange(LoginRequiredMixin, generics.UpdateAPIView):
     # form_class = UserPasswordChangeForm
