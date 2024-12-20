@@ -16,6 +16,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         user = self.user
         data['username'] = user.username
         data['photo'] = None
+        data['is_admin'] = user.is_staff
         if user.photo:
             data['photo'] = f"{self.context['request'].build_absolute_uri(settings.MEDIA_URL)}{user.photo.name}"
         return data
@@ -51,10 +52,11 @@ class LoginSerializer(serializers.Serializer):
 class RegisterSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only = True)
     password2 = serializers.CharField(write_only = True)
-
+    is_admin = serializers.BooleanField(source='is_staff', read_only=True) 
+    
     class Meta:
         model = get_user_model()
-        fields = ['username', 'email', 'password1', 'password2']
+        fields = ['username', 'email', 'password1', 'password2', 'is_admin']
 
     def validate(self, attrs):
         if attrs['password1'] != attrs['password2']:

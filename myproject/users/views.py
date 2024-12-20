@@ -76,8 +76,7 @@ class RegisterUser(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()  
-        
+        user = serializer.save() 
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
 
@@ -86,7 +85,8 @@ class RegisterUser(APIView):
             "refresh": str(refresh),
             "user": {
                 "username": user.username,
-                "photo": user.photo.url if user.photo else None,  
+                "photo": user.photo.url if user.photo else None, 
+                "is_admin": user.is_staff  
             }
         }, status=status.HTTP_201_CREATED)
     
