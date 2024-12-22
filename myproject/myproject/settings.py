@@ -14,7 +14,7 @@ from pathlib import Path
 import os
 from datetime import timedelta
 import environ
-
+from celery.schedules import crontab
 
    # Read the .env file
 
@@ -137,6 +137,63 @@ CELERY_TASK_SERIALIZER = 'json'
 #later add to the .env file
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
+
+
+
+# settings.py
+
+CRONITOR_API_KEY = '39129fe81203478988ea57ba1800ab66'  #put it in .env file later
+ENVIRONMENT = 'development'  # or 'staging', 'production', etc.
+
+
+CELERY_BEAT_SCHEDULE = {
+    # "update_database": {
+    #     "task": "update_data_in_databse",
+    #     "schedule": crontab(minute="*/1"),  # every hour
+    # },
+
+
+    "send_heart_beat": {
+        "task": "heat_beat_scheduler",
+        "schedule": crontab(minute=0), # at the start of every hour
+    },
+    "check_health": {
+        "task": "check_health",
+        "schedule": crontab(minute=0),  # at the start of every hour
+    },
+    "clean_old_orders": {
+        "task": "clean_old_orders",
+        "schedule": crontab(hour=0, minute=0),  # daily at midnight
+    },
+}
+
+
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'celery': {
+            'format': '[{levelname}] Task: {task_name} | Time: {elapsed_time:.2f}s | Status: {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'celery',
+        },
+    },
+    'loggers': {
+        'celery': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
 
 
 
