@@ -19,12 +19,16 @@ from myproject import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from webhooks.sentry_webhook import sentry_error_webhook
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('users/', include('users.urls', namespace='users')),#'users:login' #namespace is the same as # app_name= 'users', if there are the same names of urls in different apps then it wont be confused
     path('cart/', include('cart.urls', namespace='cart')),
     path('reviews/', include('reviews.urls', namespace='reviews')),
+    path('api/sentry-error/', sentry_error_webhook, name='sentry-error-webhook'),
+
 ]
 
 if settings.DEBUG: # setting the address to display uploaded picture on the page

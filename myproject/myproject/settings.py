@@ -75,6 +75,12 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 
+from corsheaders.defaults import default_headers
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'sentry-trace',  # Allow Sentry's tracing header
+    'baggage',       # Allow Sentry's baggage header
+]
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -166,6 +172,28 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour=0, minute=0),  # daily at midnight
     },
 }
+
+
+
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+sentry_sdk.init(
+    dsn="https://d8698bd8597ae1dc677b7ecf753d4ebc@o4508514431926272.ingest.us.sentry.io/4508514438086656",
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for tracing.
+    integrations=[
+        DjangoIntegration(),
+    ],
+    traces_sample_rate=1.0,
+    _experiments={
+        # Set continuous_profiling_auto_start to True
+        # to automatically start the profiler on when
+        # possible.
+        "continuous_profiling_auto_start": True,
+    },
+    send_default_pii=True,
+)
 
 
 
