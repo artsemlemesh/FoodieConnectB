@@ -20,15 +20,17 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from webhooks.sentry_webhook import sentry_error_webhook
+from graphene_django.views import GraphQLView
 
 
 urlpatterns = [
+    path('silk/', include('silk.urls', namespace='silk')),
     path("admin/", admin.site.urls),
     path('users/', include('users.urls', namespace='users')),#'users:login' #namespace is the same as # app_name= 'users', if there are the same names of urls in different apps then it wont be confused
     path('cart/', include('cart.urls', namespace='cart')),
     path('reviews/', include('reviews.urls', namespace='reviews')),
     path('api/sentry-error/', sentry_error_webhook, name='sentry-error-webhook'),
-
+    path("graphql/", GraphQLView.as_view(graphiql=True)),
 ]
 
 if settings.DEBUG: # setting the address to display uploaded picture on the page

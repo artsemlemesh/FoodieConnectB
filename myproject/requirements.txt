@@ -3,6 +3,7 @@ asgiref==3.8.1
 attrs==24.2.0
 autobahn==24.4.2
 Automat==24.8.1
+autopep8==2.3.1
 billiard==4.2.1
 celery==5.4.0
 certifi==2024.8.30
@@ -21,8 +22,10 @@ daphne==4.1.2
 Django==5.1.3
 django-cors-headers==4.6.0
 django-environ==0.11.2
+django-silk==5.3.2
 djangorestframework==3.15.2
 djangorestframework-simplejwt==5.3.1
+gprof2dot==2024.6.6
 humanize==4.11.0
 hyperlink==21.0.0
 idna==3.10
@@ -35,6 +38,7 @@ prompt_toolkit==3.0.48
 psycopg2-binary==2.9.10
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
+pycodestyle==2.12.1
 pycparser==2.22
 PyJWT==2.10.0
 pyOpenSSL==24.3.0

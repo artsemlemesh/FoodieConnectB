@@ -54,10 +54,14 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'channels',
+    'silk', #  Profiling and monitoring Django application performance. /pip install django-silk
+    'graphene_django',
 
 ]
 
 MIDDLEWARE = [
+    'silk.middleware.SilkyMiddleware',
+
     'corsheaders.middleware.CorsMiddleware', #add with cors
 
     "django.middleware.security.SecurityMiddleware",
@@ -74,6 +78,10 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
+
+GRAPHENE = {
+    "SCHEMA": "myproject.schema.schema",  # Replace `myproject` with your app name
+}
 
 from corsheaders.defaults import default_headers
 CORS_ALLOW_HEADERS = list(default_headers) + [
