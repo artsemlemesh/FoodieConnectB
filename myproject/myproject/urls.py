@@ -21,6 +21,7 @@ from django.contrib import admin
 from django.urls import path, include
 from webhooks.sentry_webhook import sentry_error_webhook
 from graphene_django.views import GraphQLView
+from django.views.decorators.csrf import csrf_exempt
 
 
 urlpatterns = [
@@ -30,7 +31,7 @@ urlpatterns = [
     path('cart/', include('cart.urls', namespace='cart')),
     path('reviews/', include('reviews.urls', namespace='reviews')),
     path('api/sentry-error/', sentry_error_webhook, name='sentry-error-webhook'),
-    path("graphql/", GraphQLView.as_view(graphiql=True)),
+    path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True))),
 ]
 
 if settings.DEBUG: # setting the address to display uploaded picture on the page

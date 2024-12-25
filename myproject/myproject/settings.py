@@ -78,9 +78,14 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
+#to resolve 403 error when using GraphQL
+CSRF_TRUSTED_ORIGINS = [ 
+    'http://localhost:3001',  # React frontend
+    'http://127.0.0.1:3001',  # In case you access via 127.0.0.1
+]
 
 GRAPHENE = {
-    "SCHEMA": "myproject.schema.schema",  # Replace `myproject` with your app name
+    "SCHEMA": "graphQL.schema.schema",  # Replace `myproject` with your app name
 }
 
 from corsheaders.defaults import default_headers
