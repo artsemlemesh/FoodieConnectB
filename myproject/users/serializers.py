@@ -17,6 +17,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data['username'] = user.username
         data['photo'] = None
         data['is_admin'] = user.is_staff
+        data['id'] = user.id
         if user.photo:
             data['photo'] = f"{self.context['request'].build_absolute_uri(settings.MEDIA_URL)}{user.photo.name}"
         return data
