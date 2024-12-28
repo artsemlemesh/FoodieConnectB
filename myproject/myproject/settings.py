@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'channels',
     'silk', #  Profiling and monitoring Django application performance. /pip install django-silk
     'graphene_django',
+    'chat'
 
 ]
 
