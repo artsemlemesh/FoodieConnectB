@@ -19,6 +19,8 @@ class Restaurant(models.Model):
     address = models.TextField()
     owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+    photo = models.ImageField(upload_to='restaurants/', blank=True)
+
 
     def __str__(self):
-        return self.name
+        return f'{self.name} - {self.owner}'
