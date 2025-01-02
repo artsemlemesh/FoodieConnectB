@@ -15,7 +15,7 @@ class CreateReviewView(APIView):
     def post(self, request):
         print(f"Authenticated user: {request.user}") 
         print(f"Request data: {request.data}")  # Debug input data
-        data = request.data
+        data = request.data.copy() # Create a mutable copy of request.data
         data['user'] = request.user.id # automatically set the user to the logged-in user
         
         serializer = ReviewSerializer(data=data, context={'request': request})
@@ -60,6 +60,13 @@ class RestaurantDetailView(APIView):
         except Restaurant.DoesNotExist:
             return Response({"error": "Restaurant not found"}, status=status.HTTP_404_NOT_FOUND)
 
+    def delete(self, request, pk):
+        try:
+            restaurant = Restaurant.objects.get(pk=pk)
+            restaurant.delete()
+            return Response({"message": "Restaurant deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Restaurant.DoesNotExist:
+            return Response({"error": "Restaurant not found"}, status=status.HTTP_404_NOT_FOUND)
 
 class DashboardDataView(APIView):
     """

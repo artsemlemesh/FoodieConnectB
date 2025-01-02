@@ -15,6 +15,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import CustomTokenObtainPairSerializer
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.permissions import AllowAny
+from rest_framework.generics import RetrieveDestroyAPIView
 
 
 # login view 
@@ -22,6 +23,17 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
 
+class UserDetailView(RetrieveDestroyAPIView):
+    """
+    Retrieve or delete a specific user by ID.
+    """
+    queryset = get_user_model().objects.all()
+    serializer_class = UserSerializer
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.delete()
+        return Response({"message": "User deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
 
 # class LoginUser(APIView):  # Change to APIView for API handling
