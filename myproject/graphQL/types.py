@@ -2,7 +2,7 @@ import graphene
 from graphene_django.types import DjangoObjectType
 from reviews.models import Restaurant, Review
 from django.contrib.auth import get_user_model
-from cart.models import Order
+from cart.models import Order, Product
 
 class ReviewType(DjangoObjectType):
     class Meta:
@@ -18,6 +18,12 @@ class RestaurantType(DjangoObjectType):
 
     def resolve_reviews(self, info):
         return self.reviews.filter(is_approved=True)
+
+class ProductType(DjangoObjectType):
+    class Meta:
+        model = Product
+        fields = ('id', 'name', 'price', 'description', 'photo', 'category')
+
 
 class UserType(DjangoObjectType):
     class Meta:
