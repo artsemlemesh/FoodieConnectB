@@ -7,7 +7,7 @@ from cart.models import Order, Product
 class ReviewType(DjangoObjectType):
     class Meta:
         model = Review
-        fields = ('user', 'rating', 'comment', 'is_approved')
+        fields = ('id', 'user', 'rating', 'restaurant', 'comment', 'is_approved')
 
 class RestaurantType(DjangoObjectType):
     reviews = graphene.List(ReviewType)
@@ -47,3 +47,5 @@ class OrderType(DjangoObjectType):
 
     def resolve_created_at(self, info):
         return self.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    
+

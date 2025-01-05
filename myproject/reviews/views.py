@@ -1,4 +1,4 @@
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -100,3 +100,32 @@ class RestaurantReviewsView(APIView):
         reviews = Review.objects.filter(restaurant_id=pk).order_by('-created_at')
         serializer = ReviewSerializer(reviews, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+# class PendingReviewsView(APIView):
+#     permission_classes = [IsAdminUser]
+
+#     def get(self, request):
+#         """
+#         Retrieve all pending reviews.
+#         """
+#         pending_reviews = Review.objects.filter(is_approved=False)
+#         serializer = ReviewSerializer(pending_reviews, many=True)
+#         return Response(serializer.data)
+ 
+
+# class PendingReviewsApproveView(APIView):
+#     permission_classes = [IsAdminUser]
+
+#     def patch(self, request, pk=None):
+#         """
+#         Approve a specific review.
+#         """
+#         try:
+#             review = Review.objects.get(pk=pk, is_approved=False)
+#             review.is_approved = True
+#             review.save()
+#             return Response({'message': 'Review approved successfully.'}, status=status.HTTP_200_OK)
+#         except Review.DoesNotExist:
+#             return Response({'error': 'Review not found or already approved.'}, status=status.HTTP_404_NOT_FOUND)
+        

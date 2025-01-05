@@ -6,6 +6,8 @@ from .views import (
     RestaurantListView,
     RestaurantDetailView,
     RestaurantReviewsView,
+    # PendingReviewsView,
+    # PendingReviewsApproveView
 )
 
 app_name = 'reviews'
@@ -22,4 +24,8 @@ urlpatterns = [
 
     # Dashboard route
     path('dashboard/', DashboardDataView.as_view(), name='dashboard-data'),  # Admin/User dashboard data
+
+    #remove them because use GraphQL, so no need urls and views
+    # path('pending/', PendingReviewsView.as_view(), name='pending-reviews'),
+    # path('pending/<int:pk>/', PendingReviewsApproveView.as_view(), name='approve-review')
 ]

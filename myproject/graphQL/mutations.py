@@ -1,10 +1,10 @@
 import graphene
-from .types import RestaurantType, ProductType
+from .types import RestaurantType, ProductType, ReviewType
 from reviews.models import Restaurant
 from cart.models import Product
 from django.contrib.auth import get_user_model
 from graphql import GraphQLError
-
+from reviews.models import Review
 
 class CreateRestaurant(graphene.Mutation):
     class Arguments:
@@ -62,6 +62,31 @@ class CreateProduct(graphene.Mutation):
         return CreateProduct(product=product)
 
 
+class ApproveReviewMutation(graphene.Mutation):
+    class Arguments:
+        review_id = graphene.ID(required=True)
+
+    success = graphene.Boolean()
+    message = graphene.String()
+    review = graphene.Field(ReviewType)
+
+    def mutate(self, info, review_id):
+        try:
+            review = Review.objects.get(pk=review_id, is_approved=False)
+            review.is_approved = True
+            review.save()
+            return ApproveReviewMutation(success=True,
+                message="Review approved successfully.",
+                review=review,)
+        except Review.DoesNotExist:
+            return ApproveReviewMutation(
+                success=False,
+                message="Review not found or already approved.",
+                review=None,
+            )
+
+
 class Mutation(graphene.ObjectType):
     create_restaurant = CreateRestaurant.Field()
     create_product = CreateProduct.Field()
+    approve_review = ApproveReviewMutation.Field()
