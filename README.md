@@ -45,3 +45,7 @@ run worker in separate consoles######################################
 
 
 #pip freeze > requirements.txt
+
+python manage.py populate_db 
+daphne -b 0.0.0.0 -p 8000 myproject.asgi:application
+pip freeze > requirements.txt

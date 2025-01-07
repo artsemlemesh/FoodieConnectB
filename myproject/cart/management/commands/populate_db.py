@@ -39,7 +39,7 @@ class Command(BaseCommand):
 
         # Create fake products
         products = []
-        for _ in range(20):  # Create 20 products
+        for _ in range(200):  # Create 200 products
             product = Product.objects.create(
                 name=fake.word().capitalize(),
                 price=fake.random_number(digits=5, fix_len=True) + fake.random_number(digits=2) / 100,  # Random price
@@ -51,7 +51,7 @@ class Command(BaseCommand):
 
         # Create fake restaurants
         restaurants = []
-        for _ in range(20):  # Create 20 restaurants
+        for _ in range(200):  # Create 200 restaurants
             restaurant = Restaurant.objects.create(
                 name=fake.company(),
                 description=fake.text(max_nb_chars=200),
