@@ -3,7 +3,7 @@ from graphene_django.types import DjangoObjectType
 from reviews.models import Restaurant, Review
 from django.contrib.auth import get_user_model
 from cart.models import Order, Product
-
+from django.conf import settings
 class ReviewType(DjangoObjectType):
     class Meta:
         model = Review
@@ -23,6 +23,12 @@ class ProductType(DjangoObjectType):
     class Meta:
         model = Product
         fields = ('id', 'name', 'price', 'description', 'photo', 'category')
+        interfaces = (graphene.relay.Node,) #this is for large datasets, set up later
+
+    def resolve_photo(self, info):
+        if self.photo:
+            return f'{settings.MEDIA_URL}{self.photo}'
+        return None
 
 
 class UserType(DjangoObjectType):
