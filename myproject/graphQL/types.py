@@ -4,6 +4,9 @@ from reviews.models import Restaurant, Review
 from django.contrib.auth import get_user_model
 from cart.models import Order, Product
 from django.conf import settings
+from graphene import relay
+from base64 import b64encode
+
 class ReviewType(DjangoObjectType):
     class Meta:
         model = Review
@@ -19,6 +22,18 @@ class RestaurantType(DjangoObjectType):
     def resolve_reviews(self, info):
         return self.reviews.filter(is_approved=True)
 
+
+class ProductFilterInput(graphene.InputObjectType):
+    # name = graphene.String()
+    category = graphene.String()
+    # min_price = graphene.Float(name="min_price")
+    # max_price = graphene.Float(name="max_price")
+
+
+class PageInfo(graphene.ObjectType):
+    has_next_page = graphene.Boolean()
+    end_cursor = graphene.String()
+
 class ProductType(DjangoObjectType):
     class Meta:
         model = Product
@@ -31,6 +46,16 @@ class ProductType(DjangoObjectType):
         return None
 
 
+class ProductConnection(graphene.Connection):
+    class Meta:
+        node = ProductType
+
+    # @staticmethod
+    # def resolve_cursor_for_node(node, *_):
+    #     cursor = f"arrayconnection:{node.id}"
+    #     encoded_cursor = b64encode(cursor.encode()).decode()
+    #     print(f"Generated cursor: {encoded_cursor}")  # Debug
+    #     return encoded_cursor
 class UserType(DjangoObjectType):
     class Meta:
         model = get_user_model()
