@@ -187,7 +187,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "generate_analytics_every_day": {
         'task': 'generate_analytics_task',
-        'schedule': crontab(minute='*/10'),  # daily at midnight
+        'schedule': crontab(minute=0),  # at the start of every hour
     }
 }
 

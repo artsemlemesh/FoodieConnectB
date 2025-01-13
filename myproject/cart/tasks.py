@@ -1,7 +1,7 @@
 from celery import shared_task
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from .models import Order
+from .models import Order, generate_purchase_analytics
 import time
 import logging
 from datetime import timedelta
@@ -58,13 +58,19 @@ def update_order_status(order_id):
         logger.error(f"Error in updating order status: {e}")
 
 
-# channel_layer = get_channel_layer()
-# async_to_sync(channel_layer.group_send)(
-#     "order_2",  # Replace with your group name
-#     {
-#         "type": "order_status_update",
-#         "status": "Delivered",
-#         "eta": "15 minutes",
-#         "position": {"lat": 40.73061, "lng": -73.935242},
-#     },
-# )
+
+@shared_task(name='generate_analytics_task')
+def generate_analytics_task():
+    try:
+        analytics = generate_purchase_analytics()
+        with open('purchase_analytics.txt', 'w') as f:
+            for item in analytics:
+                date = item.get("created_date", "Unknown Date")
+                total_orders = item.get("total_orders", 0)
+                total_sales = item.get("total_sales", 0)
+                f.write(f'{date}, Total purchased: {total_orders}, Total sales: {total_sales}\n')
+        logger.info(f'Date: {date}, Total Orders: {total_orders}, Total Sales: {total_sales}')
+        return 'Analytics generated successfully!'
+    except Exception as e:
+        logger.error(f'Error in analytics task: {e}')
+        raise
