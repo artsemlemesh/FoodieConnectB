@@ -185,6 +185,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "clean_old_orders",
         "schedule": crontab(hour=0, minute=0),  # daily at midnight
     },
+    "generate_analytics_every_day": {
+        'task': 'generate_analytics_task',
+        'schedule': crontab(minute='*/10'),  # daily at midnight
+    }
 }
 
 

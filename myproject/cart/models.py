@@ -4,7 +4,8 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from datetime import timedelta
 from reviews.models import Restaurant
-
+from django.db.models.functions import TruncDate
+from django.db.models import Count, Sum
 class Product(models.Model):
     name = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -95,6 +96,24 @@ class Order(models.Model):
                     {'type': 'order_status_update', 'message': self.status}
                 )
         super().save(*args, **kwargs)
+
+
+
+def generate_purchase_analytics():
+    analytics = (
+    Order.objects.annotate(created_date=TruncDate('created_at'))
+        .values('created_date')
+        .annotate(total_orders=Count('id'))
+        .annotate(total_sales=Sum('total_amount'))
+        .order_by('created_date')
+)
+    for item in analytics:
+        date = item.get("created_date", "Unknown Date")
+        total_orders = item.get("total_orders", 0)
+        total_sales = item.get("total_sales", 0)
+        print(f'{date}, Total purchased: {total_orders}, Total sales: {total_sales}')
+    return analytics
+        
 
 
 class OrderItem(models.Model):
