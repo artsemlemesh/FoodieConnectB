@@ -19,12 +19,40 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
+from myproject.utils import track_page_view
+from django.core.cache import caches
+
+
+
+
+class PageViewTrackingView(APIView):
+    def post(self, request):
+        page_url = request.data.get('page_url')
+        if not page_url:
+            return Response({'error': 'Page URL is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        track_page_view(page_url, request.user.id if request.user.is_authenticated else None)
+        return Response({'message': f'Page view for {page_url} tracked'}, status=status.HTTP_200_OK)
+
+    def get(self, request):
+        # Return page view count for a given page_url
+        page_url = request.query_params.get('page_url')
+        if not page_url:
+            return Response({'error': 'Page URL is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        cache = caches['page_view_cache']
+        page_view_count = cache.get(f'page_view:{page_url}', 0)
+        return Response({'page_url': page_url, 'page_view_count': page_view_count}, status=status.HTTP_200_OK)
+
 
 
 class CartView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+
+        track_page_view('cart_page', request.user.id)
+
         if request.user.is_authenticated:
             cart_items = CartItem.objects.filter(user=request.user)
             serializer = CartItemSerializer(cart_items, many=True, context={'request': request}) # explicitly pass context for displaying photos, in generics its send automatically
