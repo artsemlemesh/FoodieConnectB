@@ -1,6 +1,8 @@
 from celery import shared_task
 from datetime import timedelta
 from django.utils.timezone import now
+from django.core.cache import caches
+from django.utils import timezone
 
 import logging
 
@@ -16,3 +18,12 @@ def clean_old_orders():
     old_orders.delete()
     logger.info(f'Task: clean_old_orders completed | deleted {count} old orders')
     return f"Deleted {count} old orders."
+
+
+@shared_task(name='reset_daily_page_views')
+def reset_daily_page_views():
+    cache = caches['page_view_cache']
+    today = timezone.now().strftime('%Y-%m-%d')
+
+    for key in cache.keys(f'page_view_daily:*:{today}'):
+        cache.delete(key)

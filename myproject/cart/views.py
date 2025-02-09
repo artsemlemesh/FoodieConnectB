@@ -21,6 +21,7 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from myproject.utils import track_page_view
 from django.core.cache import caches
+from django.utils import timezone
 
 
 
@@ -41,8 +42,17 @@ class PageViewTrackingView(APIView):
             return Response({'error': 'Page URL is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         cache = caches['page_view_cache']
-        page_view_count = cache.get(f'page_view:{page_url}', 0)
-        return Response({'page_url': page_url, 'page_view_count': page_view_count}, status=status.HTTP_200_OK)
+
+        #total views
+        total_views = cache.get(f'page_view:{page_url}', 0)
+        #daily views
+        daily_views_key = f'page_view_daily:{page_url}:{timezone.now().strftime("%Y-%m-%d")}'
+        daily_views = cache.get(daily_views_key, 0)
+
+        return Response({'page_url': page_url, 'total_views': total_views, 'daily_views': daily_views}, status=status.HTTP_200_OK)
+
+        # page_view_count = cache.get(f'page_view:{page_url}', 0)
+        # return Response({'page_url': page_url, 'page_view_count': page_view_count}, status=status.HTTP_200_OK)
 
 
 

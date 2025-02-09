@@ -145,14 +145,15 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',  # Redis database 1 for caching
+        'LOCATION': 'redis://redis:6379/1',  # Redis database 1 for caching
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
+        },
+        'TIMEOUT': None, # No timeout for caching
     },
     'page_view_cache': {  # New cache configuration for page views
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/2',  # Redis database 2 for page views
+        'LOCATION': 'redis://redis:6379/2',  # Redis database 2 for page views
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
@@ -210,6 +211,12 @@ CELERY_BEAT_SCHEDULE = {
     "generate_analytics_every_day": {
         'task': 'generate_analytics_task',
         'schedule': crontab(minute=0),  # at the start of every hour
+    },
+    "reset_daily_page_views_every_day": {
+        'task': 'reset_daily_page_views',
+        # 'schedule': crontab(hour=0, minute=0),  # daily at midnight
+        'schedule': crontab(minute=0),  # at the start of every hour
+
     }
 }
 
