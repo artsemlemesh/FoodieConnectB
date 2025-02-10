@@ -65,7 +65,10 @@ class UserDetailView(RetrieveDestroyAPIView):
 #     return HttpResponseRedirect(reverse('users:login'))
 
 
-
+from django.core.cache import caches
+import logging
+logger = logging.getLogger(__name__)
+ONLINE_USERS_KEY = "online_users"
 class LogoutView(APIView):
     permission_classes = [AllowAny]  # No authentication required
 
@@ -77,6 +80,17 @@ class LogoutView(APIView):
         try:
             token = RefreshToken(refresh_token)
             token.blacklist()
+
+            # Remove user from online status
+            user_id = request.user.id
+
+            logger.info(f"User {user_id} IDENTIFIED")
+            cache = caches['page_view_cache']
+
+            if user_id:
+                cache.delete(f'{ONLINE_USERS_KEY}:{user_id}')
+                logger.info(f"User {user_id} removed from online users.")
+
             return Response({"detail": "Successfully logged out"}, status=status.HTTP_205_RESET_CONTENT)
         except TokenError:
             return Response({"detail": "Invalid or already blacklisted token"}, status=status.HTTP_400_BAD_REQUEST)

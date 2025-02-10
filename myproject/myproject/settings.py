@@ -16,6 +16,8 @@ from datetime import timedelta
 import environ
 from celery.schedules import crontab
 
+from decouple import config #initially looks in .env file
+
    # Read the .env file
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -71,8 +73,12 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+
+
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "myproject.middleware.OnlineUserTrackingMiddleware",
+
 ]
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
@@ -142,10 +148,12 @@ ASGI_APPLICATION = 'myproject.asgi.application'
 WSGI_APPLICATION = "myproject.wsgi.application"
 
 # Cache Configuration (using Redis)
+
+REDIS_HOST = config('REDIS_HOST', 'redis')
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://redis:6379/1',  # Redis database 1 for caching
+        'LOCATION': f'redis://{REDIS_HOST}:6379/1',  # Redis database 1 for caching
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         },
@@ -153,7 +161,7 @@ CACHES = {
     },
     'page_view_cache': {  # New cache configuration for page views
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://redis:6379/2',  # Redis database 2 for page views
+        'LOCATION': f'redis://{REDIS_HOST}:6379/2',  # Redis database 2 for page views
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
@@ -315,7 +323,6 @@ LOGGING = {
 #     }
 # }
 
-from decouple import config #initially looks in .env file
 
 
 DATABASES = {

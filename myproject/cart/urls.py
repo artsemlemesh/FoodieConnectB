@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import CreatePaymentIntentView, CartView, ProductListCreateView, ProductRetrieveUpdateDestroyView, UpdateOrderStatusView, ConfirmPaymentView, OrderHistoryView, OrderDeleteView \
-    , PageViewTrackingView
+    , PageViewTrackingView, OnlineUsersView
 
 from webhooks.stripe_webhook import stripe_webhook
 
@@ -22,5 +22,7 @@ urlpatterns = [
     path('order/<int:order_id>/delete/', OrderDeleteView.as_view(), name='order_delete'),
 
     path('track-page-view/', PageViewTrackingView.as_view(), name='track_page_view'),
+
+    path('online-users/', OnlineUsersView.as_view(), name='online_users'),
 
 ]

@@ -22,7 +22,20 @@ from django.shortcuts import get_object_or_404
 from myproject.utils import track_page_view
 from django.core.cache import caches
 from django.utils import timezone
+from myproject.utils import get_online_users_count
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+
+class OnlineUsersView(APIView):
+    def get(self, request):
+        online_users_count = get_online_users_count()
+        # logger.info(f"online_users: {online_users_count}")
+
+        return Response({'online_users': online_users_count}, status=status.HTTP_200_OK)
 
 
 
