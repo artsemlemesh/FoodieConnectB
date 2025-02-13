@@ -18,6 +18,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data['photo'] = None
         data['is_admin'] = user.is_staff
         data['id'] = user.id
+        data['is_premium'] = user.is_premium
         if user.photo:
             data['photo'] = f"{self.context['request'].build_absolute_uri(settings.MEDIA_URL)}{user.photo.name}"
         return data
@@ -54,10 +55,11 @@ class RegisterSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only = True)
     password2 = serializers.CharField(write_only = True)
     is_admin = serializers.BooleanField(source='is_staff', read_only=True) 
+    is_premium = serializers.BooleanField(read_only=True) 
     
     class Meta:
         model = get_user_model()
-        fields = ['username', 'email', 'password1', 'password2', 'is_admin']
+        fields = ['username', 'email', 'password1', 'password2', 'is_admin', 'is_premium']
 
     def validate(self, attrs):
         if attrs['password1'] != attrs['password2']:
@@ -67,7 +69,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = get_user_model()(
             username=validated_data['username'],
-            email=validated_data['email']
+            email=validated_data['email'],
         )
         user.set_password(validated_data['password1'])
         user.save()
@@ -77,13 +79,14 @@ class RegisterSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ['username', 'email', 'photo', 'data_birth']
+        fields = ['username', 'email', 'photo', 'data_birth', 'is_premium']
 
     def update(self, instance, validated_data):
         instance.username = validated_data.get('username', instance.username)
         instance.email = validated_data.get('email', instance.email)
         instance.photo = validated_data.get('photo', instance.photo)
         instance.data_birth = validated_data.get('data_birth', instance.data_birth)
+        instance.is_premium = validated_data.get('is_premium', instance.is_premium)
         instance.save()
         return instance
     

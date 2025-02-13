@@ -16,6 +16,8 @@ class User(AbstractUser):
         related_name='mypermissions',  # Change this to a unique name
         blank=True,
     )
+    is_premium = models.BooleanField(default=False)
+
 
 
     #access User model- get_user_model(), in settings add AUTH_USER_MODEL = "users.User" where users is an app name

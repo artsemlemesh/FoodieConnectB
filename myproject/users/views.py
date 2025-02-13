@@ -112,7 +112,8 @@ class RegisterUser(APIView):
             "user": {
                 "username": user.username,
                 "photo": user.photo.url if user.photo else None, 
-                "is_admin": user.is_staff  
+                "is_admin": user.is_staff,
+                "is_premium": user.is_premium
             }
         }, status=status.HTTP_201_CREATED)
     

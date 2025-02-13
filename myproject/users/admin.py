@@ -7,12 +7,12 @@ class CustomUserAdmin(UserAdmin):
     model = User
     # Define fieldsets to organize fields in the admin form
     fieldsets = UserAdmin.fieldsets + (
-        (None, {'fields': ('photo', 'data_birth')}),
+        (None, {'fields': ('photo', 'data_birth', 'is_premium')}),
     )
 
     # Define add_fieldsets to include custom fields when adding a new user
     add_fieldsets = UserAdmin.add_fieldsets + (
-        (None, {'fields': ('photo', 'data_birth')}),
+        (None, {'fields': ('photo', 'data_birth', 'is_premium')}),
     )
 
 

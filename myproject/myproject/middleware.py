@@ -48,3 +48,17 @@ class OnlineUserTrackingMiddleware:
         except (AuthenticationFailed, jwt.ExpiredSignatureError, jwt.InvalidTokenError, KeyError) as e:
             logger.error(f"Exception in _get_user: {e}")
             return request.user
+        
+
+
+from django.http import HttpResponseForbidden
+
+class SubscriptionMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.user.is_authenticated and not request.user.userprofile.is_premium:
+            if request.path in ['http://localhost:3001/about']:  # Restricted page
+                return HttpResponseForbidden("Upgrade to premium to access this page.")
+        return self.get_response(request)
