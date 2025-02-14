@@ -16,8 +16,10 @@ from .serializers import CustomTokenObtainPairSerializer
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.permissions import AllowAny
 from rest_framework.generics import RetrieveDestroyAPIView
-
-
+from .models import Subscription, SubscriptionPlan
+from django.utils import timezone 
+from datetime import timedelta
+from .serializers import SubscriptionSerializer, SubscriptionPlanSerializer
 # login view 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -147,3 +149,76 @@ class UserPasswordChange(LoginRequiredMixin, generics.UpdateAPIView):
         serializer.save()  #calls the save method to change the password
 
 
+class SubscriptionPlanListView(generics.ListAPIView):
+    """Returns a list of available subscription plans from the database."""
+    queryset = SubscriptionPlan.objects.all()
+    serializer_class = SubscriptionPlanSerializer
+
+class SubscribeView(generics.GenericAPIView):
+    """Allows the user to subscribe to a plan."""
+    # permission_classes = [IsAuthenticated]
+    serializer_class = SubscriptionSerializer
+
+    def post(self, request):
+        user = request.user
+        if not user.is_authenticated:
+            return Response({'error': 'You must be logged in to subscribe'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            subscription = Subscription.objects.get(user=user)
+            if subscription.is_active():
+                return Response({'error': 'You already have an active subscription'}, status=status.HTTP_400_BAD_REQUEST)
+        except Subscription.DoesNotExist:
+            pass
+
+        plan_id = request.data.get('plan')
+
+        if not plan_id:
+            return Response({'error': 'Plan is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+       
+        try:
+            plan_id = int(plan_id)
+            plan = SubscriptionPlan.objects.get(id=plan_id)
+        except ValueError:
+            return Response({'error': 'Invalid plan ID'}, status=status.HTTP_400_BAD_REQUEST)
+        except SubscriptionPlan.DoesNotExist:
+            return Response({'error': 'Plan not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        subscription, created = Subscription.objects.get_or_create(
+            user=user,
+            defaults={
+                'plan': plan,
+                'start_date': timezone.now(),
+                'end_date': timezone.now() + timedelta(days=30), #1 month subscription
+                'active': True
+            }
+            )
+        if not created:
+            subscription.plan = plan
+            subscription.start_date = timezone.now()
+            subscription.end_date = timezone.now() + timedelta(days=30)
+            subscription.active = True
+            subscription.save()
+
+        return Response({'message': f'Subscribed to {plan.name} plan'}, status=status.HTTP_200_OK)
+        
+
+class SubscriptionStatusView(generics.RetrieveAPIView):
+    """Returns the current subscription status of the authenticated user."""
+    # permission_classes = [IsAuthenticated]
+
+
+    def get(self, request):
+        user = request.user
+        try:
+            subscription = Subscription.objects.get(user=user)
+            subscription.is_active()
+            return Response({
+                'plan': subscription.plan.name,
+                'active': subscription.active,
+                'start_date': subscription.start_date,
+                'end_date': subscription.end_date
+            })
+        except Subscription.DoesNotExist:
+            return Response({'status': 'No active subscription'}, status=404)

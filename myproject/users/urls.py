@@ -2,7 +2,9 @@
 
 from django.urls import path, reverse_lazy
 from .views import RegisterUser, LogoutView, ProfileUser, UserPasswordChange, \
-      CustomTokenObtainPairView, UserListView, UserDetailView
+      CustomTokenObtainPairView, UserListView, UserDetailView, \
+      SubscriptionPlanListView, SubscribeView, SubscriptionStatusView
+
 
 from django.contrib.auth.views import PasswordChangeDoneView, PasswordResetDoneView, \
     PasswordResetView, PasswordResetConfirmView, PasswordResetCompleteView
@@ -31,5 +33,11 @@ urlpatterns = [
     path('register/', RegisterUser.as_view(), name='register'),
     path('profile/', ProfileUser.as_view(), name='profile'),
     path('users/', UserListView.as_view(), name='user-list'),                                                                                                    
-    path('users/<int:pk>/', UserDetailView.as_view(), name='user-list'),                                                                                                    
+    path('users/<int:pk>/', UserDetailView.as_view(), name='user-list'), 
+
+    #subscriptions
+    path('plans/', SubscriptionPlanListView.as_view(), name='subscription-plans'),
+    path('subscribe/', SubscribeView.as_view(), name='subscribe'),
+    path('status/', SubscriptionStatusView.as_view(), name='subscription-status'),
+
 ]
