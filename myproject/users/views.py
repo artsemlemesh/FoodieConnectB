@@ -219,6 +219,32 @@ class SubscriptionStatusView(generics.RetrieveAPIView):
                 'active': subscription.active,
                 'start_date': subscription.start_date,
                 'end_date': subscription.end_date
-            })
+            }, status=200)
         except Subscription.DoesNotExist:
-            return Response({'status': 'No active subscription'}, status=404)
+            return Response({
+                            'plan': None,
+                            'active': False
+                        }, status=200)         
+
+
+# @api_view(['POST'])
+# def subscrite_to_plan(request):
+#     user = request.user
+#     plan_id = request.data.get('plan')
+
+#     if not user.is_authenticated:
+#         return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+
+#     try:
+#         plan = SubscriptionPlan.objects.get(id=plan_id)
+#         #check if the user has alredy got a subscription
+#         subscription, created = Subscription.objects.get_or_create(user=user)
+#         subscription.plan = plan
+#         subscription.start_date = timezone.now()
+#         subscription.end_date = timezone.now() + timedelta(days=30)
+#         subscription.active = True
+#         subscription.save()
+#         return Response({'message': 'Subscribed successfully'}, status=status.HTTP_200_OK)
+#     except SubscriptionPlan.DoesNotExist:
+#         return Response({'error': 'Plan not found'}, status=status.HTTP_404_NOT_FOUND)
+

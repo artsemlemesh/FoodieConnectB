@@ -15,7 +15,11 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 class SubscriptionPlanSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubscriptionPlan
-        fields = ['name', 'description', 'price']
+        fields = ['id', 'name', 'description', 'price']
+
+
+
+
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):

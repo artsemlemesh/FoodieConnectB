@@ -20,6 +20,11 @@ class User(AbstractUser):
     is_premium = models.BooleanField(default=False)
 
 
+    #no need probably
+    # @property
+    # def has_active_subscription(self):
+    #     subscription = getattr(self, 'subscription', None)
+    #     return subscription and subscription.is_active()
 
     #access User model- get_user_model(), in settings add AUTH_USER_MODEL = "users.User" where users is an app name
 

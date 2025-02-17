@@ -6,6 +6,7 @@ from .views import RegisterUser, LogoutView, ProfileUser, UserPasswordChange, \
       SubscriptionPlanListView, SubscribeView, SubscriptionStatusView
 
 
+
 from django.contrib.auth.views import PasswordChangeDoneView, PasswordResetDoneView, \
     PasswordResetView, PasswordResetConfirmView, PasswordResetCompleteView
 
@@ -39,5 +40,6 @@ urlpatterns = [
     path('plans/', SubscriptionPlanListView.as_view(), name='subscription-plans'),
     path('subscribe/', SubscribeView.as_view(), name='subscribe'),
     path('status/', SubscriptionStatusView.as_view(), name='subscription-status'),
+    
 
 ]
