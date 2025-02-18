@@ -5,6 +5,7 @@ from rest_framework.exceptions import AuthenticationFailed
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
 import logging
+from django.contrib.auth.models import AnonymousUser
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ class OnlineUserTrackingMiddleware:
             header = self.jwt_authenticator.get_header(request)
             if header is None:
                 logger.info("No Authorization header found.")
-                return request.user  # Return AnonymousUser
+                return AnonymousUser()  # Return AnonymousUser
 
             raw_token = self.jwt_authenticator.get_raw_token(header)
             validated_token = self.jwt_authenticator.get_validated_token(raw_token)
@@ -45,20 +46,25 @@ class OnlineUserTrackingMiddleware:
             else:
                 logger.info("Token is not valid.")
             return request.user
-        except (AuthenticationFailed, jwt.ExpiredSignatureError, jwt.InvalidTokenError, KeyError) as e:
+        except (AuthenticationFailed) as e:
             logger.error(f"Exception in _get_user: {e}")
-            return request.user
+            return AnonymousUser()
+        
+        except Exception as e:
+            logger.error(f"Unexpected error in _get_user: {e}")
+            return AnonymousUser()
         
 
 
 from django.http import HttpResponseForbidden
-
+#NOT INVOLVED NOW, CAN BE DELETED
 class SubscriptionMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.user.is_authenticated and not request.user.userprofile.is_premium:
+        if request.user.is_authenticated:
+            print('REQUEST.user', request.user)
             if request.path in ['http://localhost:3001/about']:  # Restricted page
                 return HttpResponseForbidden("Upgrade to premium to access this page.")
         return self.get_response(request)
