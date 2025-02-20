@@ -31,25 +31,17 @@ class OnlineUserTrackingMiddleware:
 #still have this error in console:backend-1            | 2025-02-10 02:13:40,121 ERROR    Exception in _get_user: {'detail': ErrorDetail(string='Token contained no recognizable user identification', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid')}
     def _get_user(self, request):
         try:
-            header = self.jwt_authenticator.get_header(request)
-            if header is None:
-                logger.info("No Authorization header found.")
-                return AnonymousUser()  # Return AnonymousUser
+            # If the user is already authenticated (e.g., via sessions), return them
+            if request.user.is_authenticated:
+                return request.user
 
-            raw_token = self.jwt_authenticator.get_raw_token(header)
-            validated_token = self.jwt_authenticator.get_validated_token(raw_token)
-            # Ensure token is valid
-            if validated_token:
-                user = self.jwt_authenticator.get_user(validated_token)
-                # logger.info(f"Authenticated user: {user.username} (ID: {user.id})")
-                return user
-            else:
-                logger.info("Token is not valid.")
-            return request.user
-        except (AuthenticationFailed) as e:
+           
+            return AnonymousUser()
+
+        except AuthenticationFailed as e:
             logger.error(f"Exception in _get_user: {e}")
             return AnonymousUser()
-        
+
         except Exception as e:
             logger.error(f"Unexpected error in _get_user: {e}")
             return AnonymousUser()
