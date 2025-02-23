@@ -190,14 +190,14 @@ class SubscribeView(generics.GenericAPIView):
             defaults={
                 'plan': plan,
                 'start_date': timezone.now(),
-                'end_date': timezone.now() + timedelta(days=30), #1 month subscription
+                'end_date': timezone.now() + timedelta(days=1), #1 day subscription
                 'active': True
             }
             )
         if not created:
             subscription.plan = plan
             subscription.start_date = timezone.now()
-            subscription.end_date = timezone.now() + timedelta(days=30)
+            subscription.end_date = timezone.now() + timedelta(days=1)
             subscription.active = True
             subscription.save()
 
