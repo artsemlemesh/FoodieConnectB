@@ -1,5 +1,5 @@
 import graphene
-from .queries import Query
-from .mutations import Mutation
+from graphQL.queries import Query
+from graphQL.mutations import Mutation
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
