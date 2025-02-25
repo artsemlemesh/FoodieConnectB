@@ -7,7 +7,7 @@ from graphql import GraphQLError
 from reviews.models import Review
 
 class CreateRestaurant(graphene.Mutation):
-    class Arguments:
+    class Arguments: #arguments required to create a restaurant
         name = graphene.String(required=True)
         description = graphene.String(required=True)
         address = graphene.String(required=True)
@@ -15,6 +15,7 @@ class CreateRestaurant(graphene.Mutation):
 
     restaurant = graphene.Field(RestaurantType)
 
+    #function to create a restaurant and save it to the database and return the created restaurant
     def mutate(self, info, name, description, address, owner_id):
         # Validate owner existence
         try:
@@ -44,6 +45,7 @@ class CreateProduct(graphene.Mutation):
 
     product = graphene.Field(ProductType)
 
+    #creates a product, validates the price and saves it to the database
     def mutate(self, info, name, price, description, category):
         # Validate that price is non-negative
         if price < 0:
@@ -70,6 +72,7 @@ class ApproveReviewMutation(graphene.Mutation):
     message = graphene.String()
     review = graphene.Field(ReviewType)
 
+    #function to approve a review
     def mutate(self, info, review_id):
         try:
             review = Review.objects.get(pk=review_id, is_approved=False)
@@ -85,7 +88,7 @@ class ApproveReviewMutation(graphene.Mutation):
                 review=None,
             )
 
-
+#class to define the mutations
 class Mutation(graphene.ObjectType):
     create_restaurant = CreateRestaurant.Field()
     create_product = CreateProduct.Field()

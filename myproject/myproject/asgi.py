@@ -10,13 +10,13 @@ from django.urls import path
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "myproject.settings")
 
 def get_graphql_application():
-    from chat.schema import schema  # Import schema only when needed
+    from chat.schema import schema  # Import schema only when needed, or else it will be imported at startup and cause errors
     return GraphQL(schema, debug=True)
 
 
-application = ProtocolTypeRouter({
+application = ProtocolTypeRouter({ 
     "http": get_asgi_application(),
-    "websocket": AuthMiddlewareStack(
+    "websocket": AuthMiddlewareStack( 
         URLRouter([
             *websocket_urlpatterns,
             path("graphql/", get_graphql_application()),  # Use function to return GraphQL ASGI app

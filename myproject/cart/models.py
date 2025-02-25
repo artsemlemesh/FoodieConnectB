@@ -84,7 +84,7 @@ class Order(models.Model):
         self.eta = self.created_at + timedelta(minutes=minutes)
         self.save()
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs): #updates the status of the order, (can be not efficient)
         # Check if the status has changed
         if self.pk:  # Ensure this is an update, not a new object
             old_status = Order.objects.filter(pk=self.pk).values_list('status', flat=True).first()

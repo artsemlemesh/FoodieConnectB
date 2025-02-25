@@ -63,27 +63,27 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'silk.middleware.SilkyMiddleware',
+    'silk.middleware.SilkyMiddleware', # Profiling and monitoring Django application performance.
 
-    'corsheaders.middleware.CorsMiddleware', #add with cors
+    'corsheaders.middleware.CorsMiddleware', # allows or restricts requests from different origins
 
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.security.SecurityMiddleware", #adds security headers to responses, and helps protect against clickjacking, cross-site scripting, etc. enforcing HTTPS
+    "django.contrib.sessions.middleware.SessionMiddleware", #manages sessions across requests, enables session data to be stored in the database, can use in views and templates
 
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.middleware.common.CommonMiddleware", #adds several helpful middleware methods for handling common request/response operations, such as content type, etc., URL normalization and trailing slashes
+    "django.middleware.csrf.CsrfViewMiddleware", #protects against Cross Site Request Forgery attacks, by adding a hidden form field to POST requests, ensuring that the POST request is from the same site
+    "django.contrib.auth.middleware.AuthenticationMiddleware", #adds the user object to the request object, so you can access the user object in views, templates, etc.
 
 
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "myproject.middleware.OnlineUserTrackingMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware", #enables cookie- and session-based messaging, and allows messages to be passed between views
+    "django.middleware.clickjacking.XFrameOptionsMiddleware", #protects against clickjacking attacks, by setting the X-Frame-Options header to 'DENY'
+    "myproject.middleware.OnlineUserTrackingMiddleware", #custom middleware to track online users
 
 ]
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost'] #list of strings representing the host/domain names that this Django site can serve
+CORS_ALLOW_ALL_ORIGINS = True #allows all origins to access the server
+CORS_ALLOW_CREDENTIALS = True #allows credentials to be included in requests
 
 #to resolve 403 error when using GraphQL
 CSRF_TRUSTED_ORIGINS = [ 
@@ -92,21 +92,22 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 GRAPHENE = {
-    "SCHEMA": "graphQL.schema.schema",  # Replace `myproject` with your app name
+    "SCHEMA": "graphQL.schema.schema",  
 }
 
 from corsheaders.defaults import default_headers
+
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'sentry-trace',  # Allow Sentry's tracing header
     'baggage',       # Allow Sentry's baggage header
 ]
 
-REST_FRAMEWORK = {
+REST_FRAMEWORK = { 
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication', #allows users to authenticate using an API key
+        'rest_framework_simplejwt.authentication.JWTAuthentication', 
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.BasicAuthentication',#allows users to authenticate using a username and password
     ],
     # 'DEFAULT_PERMISSION_CLASSES': [
     #     'rest_framework.permissions.IsAuthenticated',
@@ -196,7 +197,7 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0
 
 # settings.py
 
-CRONITOR_API_KEY = '39129fe81203478988ea57ba1800ab66'  #put it in .env file later
+CRONITOR_API_KEY = os.getenv("CRONITOR_API_KEY", "default_api_key")  
 ENVIRONMENT = 'development'  # or 'staging', 'production', etc.
 
 
@@ -283,51 +284,6 @@ LOGGING = {
 
 
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'console': {
-#             'class': 'logging.StreamHandler',
-#         },
-#     },
-#     'loggers': {
-#         'django': {
-#             'handlers': ['console'],
-#             'level': 'DEBUG',
-#         },
-#         'channels': {
-#             'handlers': ['console'],
-#             'level': 'DEBUG',
-#         },
-#     },
-# }
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
-
-# This ensures the backend connects to PostgreSQL when running in Docker but falls back to SQLite if environment variables are not set.
-# DATABASES = {
-#     'default': {
-#         'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.sqlite3'),
-#         'NAME': os.getenv('DB_NAME', BASE_DIR / 'db.sqlite3'),
-#         'USER': os.getenv('DB_USER', ''),
-#         'PASSWORD': os.getenv('DB_PASSWORD', ''),
-#         'HOST': os.getenv('DB_HOST', 'localhost'),
-#         'PORT': os.getenv('DB_PORT', ''),
-#     }
-# }
-
-
-
 DATABASES = {
     'default': {
         'ENGINE': config('DB_ENGINE'),
@@ -406,10 +362,10 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend" #this line is for 
 
 #NEED TO SET UP LATER
 #the lines below is for password reset by email, it finally works perfectly and sends email on my mail
-EMAIL_HOST = 'smtp.yandex.ru'
-EMAIL_PORT = 465
-EMAIL_HOST_USER = 'artem.lems@yandex.ru'
-EMAIL_HOST_PASSWORD = 'fsjmlstvaabhrbhp'
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.yandex.ru')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 465))
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'email')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'password')
 EMAIL_USE_SSL = True
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER #this line is important for sending messages such as password reset(doesnt work without it)

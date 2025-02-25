@@ -50,6 +50,8 @@ class OnlineUserTrackingMiddleware:
 
 from django.http import HttpResponseForbidden
 #NOT INVOLVED NOW, CAN BE DELETED
+from decouple import config
+HOST_ADDRESS = config('HOST_ADDRESS','http://localhost:3001')
 class SubscriptionMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -57,6 +59,6 @@ class SubscriptionMiddleware:
     def __call__(self, request):
         if request.user.is_authenticated:
             print('REQUEST.user', request.user)
-            if request.path in ['http://localhost:3001/about']:  # Restricted page
+            if request.path in [f'{HOST_ADDRESS}/about']:  # Restricted page
                 return HttpResponseForbidden("Upgrade to premium to access this page.")
         return self.get_response(request)
