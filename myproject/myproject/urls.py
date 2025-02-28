@@ -32,6 +32,7 @@ urlpatterns = [
     path('reviews/', include('reviews.urls', namespace='reviews')),
     path('api/sentry-error/', sentry_error_webhook, name='sentry-error-webhook'),
     path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True))),
+    path('livedel/', include('livedel.urls', namespace='livedel')),
 ]
 
 if settings.DEBUG: # setting the address to display uploaded picture on the page

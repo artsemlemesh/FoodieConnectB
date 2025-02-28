@@ -14,7 +14,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Restaurant
-        fields = ['id', 'name', 'description','address', 'owner', 'created_at', 'photo']
+        fields = ['id', 'name', 'description','address', 'owner', 'created_at', 'photo', 'latitude', 'longitude']
 
     #to return absolute path for photos
     def get_photo(self, obj):

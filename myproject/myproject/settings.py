@@ -58,7 +58,8 @@ INSTALLED_APPS = [
     'channels',
     'silk', #  Profiling and monitoring Django application performance. /pip install django-silk
     'graphene_django',
-    'chat'
+    'chat',
+    'livedel',
 
 ]
 
@@ -132,6 +133,7 @@ SIMPLE_JWT = {
 
 ROOT_URLCONF = "myproject.urls"
 
+#context processors- funcs that automatically add data to the context of every template. So, we dont have to pass manually the same data to every view
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -153,7 +155,9 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 
 # Cache Configuration (using Redis)
 
-REDIS_HOST = config('REDIS_HOST', 'redis')
+REDIS_HOST = config('REDIS_HOST', 'localhost')
+print("REDIS_HOST:", REDIS_HOST)
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
@@ -172,6 +176,8 @@ CACHES = {
     }
 }
 
+
+
 # Session Configuration (optional, if you want to store session data in Redis)
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
@@ -180,7 +186,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("redis", 6379)],   #later set up REDIS_HOST and REDIS_PORT environment variables
+            "hosts": [(REDIS_HOST, 6379)],   #later set up REDIS_HOST and REDIS_PORT environment variables
         },
     },
 }
@@ -192,9 +198,12 @@ CELERY_TASK_SERIALIZER = 'json'
 #later add to the .env file
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0") # Redis database 0
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
+print("CELERY_BROKER_URL:", CELERY_BROKER_URL)
+print("CELERY_RESULT_BACKEND:", CELERY_RESULT_BACKEND)
+print('REDIS_HOST', REDIS_HOST)
 
-
-
+print("CACHE LOCATION (default):", CACHES['default']['LOCATION'])
+print("CACHE LOCATION (page_view_cache):", CACHES['page_view_cache']['LOCATION'])
 # settings.py
 
 CRONITOR_API_KEY = os.getenv("CRONITOR_API_KEY", "default_api_key")  

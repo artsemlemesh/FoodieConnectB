@@ -17,6 +17,8 @@ class Restaurant(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(default="")
     address = models.TextField()
+    latitude = models.FloatField(null=True, blank=True)  # Add latitude
+    longitude = models.FloatField(null=True, blank=True)  # Add longitude
     owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     photo = models.ImageField(upload_to='restaurants/', blank=True)
