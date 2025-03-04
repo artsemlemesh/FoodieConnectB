@@ -50,79 +50,14 @@ def start_delivery(request, order_id):
         status=status.HTTP_200_OK,
     )
     
-# @api_view(['GET'])
-# def get_order(request, order_id):
-#     """
-#     Retrieve order details including status, ETA, and route data.
-#     """
-#     order = get_object_or_404(Order, id=order_id)
-    
-#     return Response({
-#         'id': order.id,
-#         'status': order.status,
-#         'eta': order.eta,
-#         'route_data': json.loads(order.route_data) if order.route_data else None,
-#         'current_position_index': order.current_position_index,
-#     }, status=status.HTTP_200_OK)
-    
-    
-    
-    
-    
-# @api_view(['POST'])
-# def move_delivery(request, order_id):
-#     """
-#     Simulate real-time movement along the delivery route.
-#     """
-#     order = get_object_or_404(Order, id=order_id)
-
-#     if order.status != Order.Status.EN_ROUTE or not order.route_data:
-#         return Response({"error": "Order is not en route or has no route data."}, status=status.HTTP_400_BAD_REQUEST)
-
-#     route = json.loads(order.route_data)
-
-#     if order.current_position_index < len(route) - 1:
-#         order.current_position_index += 1
-#         order.save()
-
-#         current_location = route[order.current_position_index]
-#         return Response({
-#             "latitude": current_location[1],  # Reverse lat/lon for consistency
-#             "longitude": current_location[0],
-#             "current_position_index": order.current_position_index
-#         }, status=status.HTTP_200_OK)
-#     else:
-#         # If last point reached, mark as delivered
-#         order.status = Order.Status.DELIVERED
-#         order.save()
-#         return Response({"message": "Order delivered."}, status=status.HTTP_200_OK)
-    
-    
-# @api_view(['POST'])
-# def move_delivery(request, order_id):
-#     """
-#     Simulate real-time movement along the delivery route.
-#     """
-#     order = get_object_or_404(Order, id=order_id)
-    
-#     if order.status != Order.Status.EN_ROUTE or not order.route_data:
-#         return Response({"error": "Order is not en route or has no route data."}, status=status.HTTP_400_BAD_REQUEST)
-
-#     route = json.loads(order.route_data)
-    
-#     if order.current_position_index < len(route) - 1:
-#         order.current_position_index += 1
-#         order.save()
-        
-#         current_location = route[order.current_position_index]
-#         return Response({
-#             "latitude": current_location[1],  # Reverse lat/lon for consistency
-#             "longitude": current_location[0],
-#             "current_position_index": order.current_position_index
-#         }, status=status.HTTP_200_OK)
-#     else:
-#         # If last point reached, mark as delivered
-#         order.status = Order.Status.DELIVERED
-#         order.eta = now()
-#         order.save()
-#         return Response({"message": "Order delivered."}, status=status.HTTP_200_OK)
+@api_view(['POST'])
+def reset_order(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id)
+        order.status = Order.Status.PREPARING
+        order.current_position_index = 1
+        order.eta = None
+        order.save()
+        return Response({"message": "Order reset successfully."}, status=status.HTTP_200_OK)
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
