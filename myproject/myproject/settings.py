@@ -197,8 +197,8 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
 #later add to the .env file
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0") # Redis database 0
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
+CELERY_BROKER_URL = config("CELERY_BROKER_URL", "redis://redis:6379/0") # Redis database 0
+CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
 print("CELERY_BROKER_URL:", CELERY_BROKER_URL)
 print("CELERY_RESULT_BACKEND:", CELERY_RESULT_BACKEND)
 print('REDIS_HOST', REDIS_HOST)
