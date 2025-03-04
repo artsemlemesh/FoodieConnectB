@@ -156,6 +156,7 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 # Cache Configuration (using Redis)
 
 REDIS_HOST = config('REDIS_HOST', 'localhost')
+# REDIS_HOST = 'redis'
 print("REDIS_HOST:", REDIS_HOST)
 
 CACHES = {

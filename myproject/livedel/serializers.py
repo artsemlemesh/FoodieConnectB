@@ -9,3 +9,12 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = "__all__"
+        
+    def get_restaurant(self, obj):
+        """Return restaurant location if available."""
+        if obj.restaurant:
+            return {
+                'latitude': obj.restaurant.latitude,
+                'longitude': obj.restaurant.longitude,
+            }
+        return None
