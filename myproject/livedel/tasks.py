@@ -53,7 +53,8 @@ def update_delivery_location(order_id):
         # Schedule the next movement if not yet delivered
         if order.status != "DELIVERED":
             update_delivery_location.apply_async((order_id,), countdown=5)  # Runs after 5 sec
-
+        
+        logger.info(f"Order {order_id} updated to position {order.current_position_index}.")
 
     except Order.DoesNotExist:
         logger.error(f"Order {order_id} not found.")
