@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swagger UI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@4/swagger-ui.css">
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@4/swagger-ui-bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@4/swagger-ui-standalone-preset.js"></script>
+</head>
+<body>
+    <div id="swagger-ui"></div>
+
+    <script>
+        window.onload = function() {
+            console.log("Initializing Swagger UI...");
+
+            // Initialize Swagger UI
+            const ui = SwaggerUIBundle({
+                url: "/schema/",  // URL to the OpenAPI schema
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIBundle.presets.swagger
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "BaseLayout",
+                onComplete: function() {
+                    const token = localStorage.getItem('swagger_token');
+                    console.log("Token retrieved from localStorage:", token);
+
+                    if (token) {
+                        // If token is in localStorage, authorize it automatically
+                        ui.authActions.authorize({
+                            BearerAuth: {
+                                name: "Authorization",
+                                schema: {
+                                    type: "apiKey",
+                                    in: "header",
+                                    name: "Authorization",
+                                    description: "Enter your token in the format: **Bearer &lt;token&gt;"
+                                },
+                                value: `Bearer ${token}`
+                            }
+                        });
+                        console.log("Token applied to Swagger UI.");
+                    } else {
+                        console.log("No token found in localStorage.");
+                    }
+                }
+            });
+
+            // Handle saving the token manually after the user authorizes
+            ui.authActions.authorize = (function(original) {
+                return function(authData) {
+
+                    console.log("Authorization data:", authData);  // Debugging line
+
+                    original(authData);
+
+                    const token = authData['tokenAuth'] && authData['tokenAuth'].value;
+                    if (token) {
+                        // Save the token to localStorage
+                        console.log("Saving token to localStorage:", token);  // Debugging line
+                        localStorage.setItem('swagger_token', token.replace("Bearer ", ""));
+                    } else {
+                        console.log("No token received from authData.");
+                    }
+                };
+            })(ui.authActions.authorize);
+        };
+    </script>
+</body>
+</html>

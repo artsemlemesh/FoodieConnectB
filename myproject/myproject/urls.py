@@ -22,6 +22,8 @@ from django.urls import path, include
 from webhooks.sentry_webhook import sentry_error_webhook
 from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from django.views.generic import TemplateView
 
 
 urlpatterns = [
@@ -33,6 +35,9 @@ urlpatterns = [
     path('api/sentry-error/', sentry_error_webhook, name='sentry-error-webhook'),
     path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True))),
     path('livedel/', include('livedel.urls', namespace='livedel')),
+    
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('swagger/', TemplateView.as_view(template_name='swagger-ui.html'), name='swagger-ui'),
 ]
 
 if settings.DEBUG: # setting the address to display uploaded picture on the page

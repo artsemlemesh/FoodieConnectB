@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     'graphene_django',
     'chat',
     'livedel',
+    
+    'drf_spectacular',
 
 ]
 
@@ -104,6 +106,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 ]
 
 REST_FRAMEWORK = { 
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication', #allows users to authenticate using an API key
         'rest_framework_simplejwt.authentication.JWTAuthentication', 
@@ -113,6 +116,26 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PERMISSION_CLASSES': [
     #     'rest_framework.permissions.IsAuthenticated',
     # ],
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'My API',
+    'DESCRIPTION': 'API documentation for my project',
+    'VERSION': '1.0.0',
+    'SCHEMA_PATH_PREFIX': '/api/',
+    'SECURITY': [
+        {
+            'BearerAuth': []
+        }
+    ],
+    'SECURITY_DEFINITIONS': {
+        'BearerAuth': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization',
+            'description': 'Enter token in the format **Bearer &lt;token&gt;',
+        }
+    },
 }
 
 
